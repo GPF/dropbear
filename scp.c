@@ -69,7 +69,7 @@
  * SUCH DAMAGE.
  *
  */
-
+#define S_IWRITE 0200
 #include "includes.h"
 /*RCSID("$OpenBSD: scp.c,v 1.130 2006/01/31 10:35:43 djm Exp $");*/
 

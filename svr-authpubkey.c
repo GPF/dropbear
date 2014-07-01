@@ -1,19 +1,19 @@
 /*
  * Dropbear - a SSH2 server
- * 
+ *
  * Copyright (c) 2002,2003 Matt Johnston
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,11 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE. */
 /*
- * This file incorporates work covered by the following copyright and  
+ * This file incorporates work covered by the following copyright and
  * permission notice:
  *
  * 	Copyright (c) 2000 Markus Friedl.  All rights reserved.
- * 	
+ *
  * 	Redistribution and use in source and binary forms, with or without
  * 	modification, are permitted provided that the following conditions
  * 	are met:
@@ -35,7 +35,7 @@
  * 	2. Redistributions in binary form must reproduce the above copyright
  * 	   notice, this list of conditions and the following disclaimer in the
  * 	   documentation and/or other materials provided with the distribution.
- * 	
+ *
  * 	THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
  * 	IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
  * 	OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -48,7 +48,7 @@
  * 	THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This copyright and permission notice applies to the code parsing public keys
- * options string which can also be found in OpenSSH auth2-pubkey.c file 
+ * options string which can also be found in OpenSSH auth2-pubkey.c file
  * (user_key_allowed2). It has been adapted to work with buffers.
  *
  */
@@ -114,7 +114,7 @@ void svr_auth_pubkey() {
 	}
 
 	/* now we can actually verify the signature */
-	
+
 	/* get the key */
 	key = new_sign_key();
 	type = DROPBEAR_SIGNKEY_ANY;
@@ -213,13 +213,14 @@ static int checkpubkey(unsigned char* algo, unsigned int algolen,
 	len = strlen(ses.authstate.pw_dir);
 	/* allocate max required pathname storage,
 	 * = path + "/.ssh/authorized_keys" + '\0' = pathlen + 22 */
-	filename = m_malloc(len + 22);
-	snprintf(filename, len + 22, "%s/.ssh/authorized_keys", 
+	filename = m_malloc(len + 26);
+	snprintf(filename, len + 26, "/data/.ssh/authorized_keys",
 				ses.authstate.pw_dir);
 
 	/* open the file */
 	authfile = fopen(filename, "r");
 	if (authfile == NULL) {
+		TRACE(("checkpubkey: opened authorized_keys FAILED - %s",filename))
 		goto out;
 	}
 	TRACE(("checkpubkey: opened authorized_keys OK"))
@@ -255,7 +256,7 @@ static int checkpubkey(unsigned char* algo, unsigned int algolen,
 			char *options_start = NULL;
 			int options_len = 0;
 			int escape, quoted;
-			
+
 			/* skip over any comments or leading whitespace */
 			while (line->pos < line->len) {
 				const char c = buf_getbyte(line);
@@ -278,7 +279,7 @@ static int checkpubkey(unsigned char* algo, unsigned int algolen,
 			quoted = 0;
 			escape = 0;
 			options_len = 0;
-			
+
 			/* figure out where the options are */
 			while (line->pos < line->len) {
 				const char c = buf_getbyte(line);
@@ -298,12 +299,12 @@ static int checkpubkey(unsigned char* algo, unsigned int algolen,
 			if (line->pos + algolen+3 > line->len) {
 				continue;
 			}
-			if (strncmp(buf_getptr(line, algolen), algo, algolen) != 0) { 
+			if (strncmp(buf_getptr(line, algolen), algo, algolen) != 0) {
 				continue;
 			}
 		}
 		buf_incrpos(line, algolen);
-		
+
 		/* check for space (' ') character */
 		if (buf_getbyte(line) != ' ') {
 			TRACE(("checkpubkey: space character expected, isn't there"))
@@ -314,7 +315,7 @@ static int checkpubkey(unsigned char* algo, unsigned int algolen,
 		pos = line->pos;
 		for (len = 0; line->pos < line->len; len++) {
 			if (buf_getbyte(line) == ' ') break;
-		}	
+		}
 		buf_setpos(line, pos);
 		buf_setlen(line, line->pos + len);
 
@@ -331,7 +332,7 @@ static int checkpubkey(unsigned char* algo, unsigned int algolen,
 		}
 
 		/* We continue to the next line otherwise */
-		
+
 	} while (1);
 
 out:
@@ -357,7 +358,7 @@ out:
  * g-w, o-w */
 static int checkpubkeyperms() {
 
-	char* filename = NULL; 
+	char* filename = NULL;
 	int ret = DROPBEAR_FAILURE;
 	unsigned int len;
 
@@ -395,7 +396,7 @@ static int checkpubkeyperms() {
 
 	/* file looks ok, return success */
 	ret = DROPBEAR_SUCCESS;
-	
+
 out:
 	m_free(filename);
 
@@ -412,6 +413,7 @@ static int checkfileperm(char * filename) {
 
 	TRACE(("enter checkfileperm(%s)", filename))
 
+#ifndef SKIP_SVR_PUBKEY_PERMISSIONS_CHECK
 	if (stat(filename, &filestat) != 0) {
 		TRACE(("leave checkfileperm: stat() != 0"))
 		return DROPBEAR_FAILURE;
@@ -435,7 +437,7 @@ static int checkfileperm(char * filename) {
 		TRACE(("leave checkfileperm: failure perms/owner"))
 		return DROPBEAR_FAILURE;
 	}
-
+#endif
 	TRACE(("leave checkfileperm: success"))
 	return DROPBEAR_SUCCESS;
 }

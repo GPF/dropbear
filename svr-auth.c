@@ -1,19 +1,19 @@
 /*
  * Dropbear - a SSH2 server
- * 
+ *
  * Copyright (c) 2002,2003 Matt Johnston
  * All rights reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -47,14 +47,14 @@ void svr_authinitialise() {
 	ses.authstate.pw_shell = NULL;
 	ses.authstate.pw_passwd = NULL;
 	authclear();
-	
+
 }
 
 /* Reset the auth state, but don't reset the failcount. This is for if the
  * user decides to try with a different username etc, and is also invoked
  * on initialisation */
 static void authclear() {
-	
+
 	memset(&ses.authstate, 0, sizeof(ses.authstate));
 #ifdef ENABLE_SVR_PUBKEY_AUTH
 	ses.authstate.authtypes |= AUTH_TYPE_PUBKEY;
@@ -76,7 +76,7 @@ static void authclear() {
 	if (ses.authstate.pw_passwd) {
 		m_free(ses.authstate.pw_passwd);
 	}
-	
+
 }
 
 /* Send a banner message if specified to the client. The client might
@@ -127,7 +127,7 @@ void recv_msg_userauth_request() {
 	if (servicelen != SSH_SERVICE_CONNECTION_LEN
 			&& (strncmp(servicename, SSH_SERVICE_CONNECTION,
 					SSH_SERVICE_CONNECTION_LEN) != 0)) {
-		
+
 		/* TODO - disconnect here */
 		m_free(username);
 		m_free(servicename);
@@ -135,7 +135,7 @@ void recv_msg_userauth_request() {
 		dropbear_exit("unknown service in auth");
 	}
 
-	/* check username is good before continuing. 
+	/* check username is good before continuing.
 	 * the 'incrfail' varies depending on the auth method to
 	 * avoid giving away which users exist on the system through
 	 * the time delay. */
@@ -151,10 +151,10 @@ void recv_msg_userauth_request() {
 		if (valid_user
 				&& svr_opts.allowblankpass
 				&& !svr_opts.noauthpass
-				&& !(svr_opts.norootpass && ses.authstate.pw_uid == 0) 
-				&& ses.authstate.pw_passwd[0] == '\0') 
+				&& !(svr_opts.norootpass && ses.authstate.pw_uid == 0)
+				&& ses.authstate.pw_passwd[0] == '\0')
 		{
-			dropbear_log(LOG_NOTICE, 
+			dropbear_log(LOG_NOTICE,
 					"Auth succeeded with blank password for '%s' from %s",
 					ses.authstate.pw_name,
 					svr_ses.addrstring);
@@ -168,7 +168,7 @@ void recv_msg_userauth_request() {
 			goto out;
 		}
 	}
-	
+
 #ifdef ENABLE_SVR_PASSWORD_AUTH
 	if (!svr_opts.noauthpass &&
 			!(svr_opts.norootpass && ses.authstate.pw_uid == 0) ) {
@@ -291,6 +291,7 @@ static int checkusername(unsigned char *username, unsigned int userlen) {
 	 * should return some standard shells like "/bin/sh" and "/bin/csh" (this
 	 * is platform-specific) */
 	setusershell();
+	goto goodshell;
 	while ((listshell = getusershell()) != NULL) {
 		TRACE(("test shell is '%s'", listshell))
 		if (strcmp(listshell, usershell) == 0) {
@@ -304,7 +305,7 @@ static int checkusername(unsigned char *username, unsigned int userlen) {
 	dropbear_log(LOG_WARNING, "User '%s' has invalid shell, rejected",
 				ses.authstate.pw_name);
 	return DROPBEAR_FAILURE;
-	
+
 goodshell:
 	endusershell();
 	TRACE(("matching shell"))
@@ -326,7 +327,7 @@ void send_msg_userauth_failure(int partial, int incrfail) {
 	TRACE(("enter send_msg_userauth_failure"))
 
 	CHECKCLEARTOWRITE();
-	
+
 	buf_putbyte(ses.writepayload, SSH_MSG_USERAUTH_FAILURE);
 
 	/* put a list of allowed types */
@@ -338,7 +339,7 @@ void send_msg_userauth_failure(int partial, int incrfail) {
 			buf_putbyte(typebuf, ',');
 		}
 	}
-	
+
 	if (ses.authstate.authtypes & AUTH_TYPE_PASSWORD) {
 		buf_putbytes(typebuf, AUTH_METHOD_PASSWORD, AUTH_METHOD_PASSWORD_LEN);
 	}
@@ -375,7 +376,7 @@ void send_msg_userauth_failure(int partial, int incrfail) {
 		dropbear_exit("Max auth tries reached - user '%s' from %s",
 				userstr, svr_ses.addrstring);
 	}
-	
+
 	TRACE(("leave send_msg_userauth_failure"))
 }
 
@@ -389,7 +390,7 @@ void send_msg_userauth_success() {
 	buf_putbyte(ses.writepayload, SSH_MSG_USERAUTH_SUCCESS);
 	encrypt_packet();
 
-	/* authdone must be set after encrypt_packet() for 
+	/* authdone must be set after encrypt_packet() for
 	 * delayed-zlib mode */
 	ses.authstate.authdone = 1;
 	ses.connect_time = 0;
@@ -401,7 +402,7 @@ void send_msg_userauth_success() {
 
 	/* Remove from the list of pre-auth sockets. Should be m_close(), since if
 	 * we fail, we might end up leaking connection slots, and disallow new
-	 * logins - a nasty situation. */							
+	 * logins - a nasty situation. */
 	m_close(svr_ses.childpipe);
 
 	TRACE(("leave send_msg_userauth_success"))

@@ -21,13 +21,13 @@
 
 /* Default hostkey paths - these can be specified on the command line */
 #ifndef DSS_PRIV_FILENAME
-#define DSS_PRIV_FILENAME "/etc/dropbear/dropbear_dss_host_key"
+#define DSS_PRIV_FILENAME "/data/dropbear/dropbear_dss_host_key"
 #endif
 #ifndef RSA_PRIV_FILENAME
-#define RSA_PRIV_FILENAME "/etc/dropbear/dropbear_rsa_host_key"
+#define RSA_PRIV_FILENAME "/data/dropbear/dropbear_rsa_host_key"
 #endif
 #ifndef ECDSA_PRIV_FILENAME
-#define ECDSA_PRIV_FILENAME "/etc/dropbear/dropbear_ecdsa_host_key"
+#define ECDSA_PRIV_FILENAME "/data/dropbear/dropbear_ecdsa_host_key"
 #endif
 
 /* Set NON_INETD_MODE if you require daemon functionality (ie Dropbear listens
@@ -75,7 +75,7 @@ much traffic. */
 /* Note: Both ENABLE_CLI_PROXYCMD and ENABLE_CLI_NETCAT must be set to
  * allow multihop dbclient connections */
 
-/* Allow using -J <proxycommand> to run the connection through a 
+/* Allow using -J <proxycommand> to run the connection through a
    pipe to a program, rather the normal TCP connection */
 #define ENABLE_CLI_PROXYCMD
 
@@ -88,7 +88,7 @@ much traffic. */
 
 /* Encryption - at least one required.
  * Protocol RFC requires 3DES and recommends AES128 for interoperability.
- * Including multiple keysize variants the same cipher 
+ * Including multiple keysize variants the same cipher
  * (eg AES256 as well as AES128) will result in a minimal size increase.*/
 #define DROPBEAR_AES128
 #define DROPBEAR_3DES
@@ -99,7 +99,7 @@ much traffic. */
 #define DROPBEAR_TWOFISH128
 
 /* Enable "Counter Mode" for ciphers. This is more secure than normal
- * CBC mode against certain attacks. This adds around 1kB to binary 
+ * CBC mode against certain attacks. This adds around 1kB to binary
  * size and is recommended for most cases */
 #define DROPBEAR_ENABLE_CTR_MODE
 
@@ -141,23 +141,23 @@ much traffic. */
 /* ECDSA is significantly faster than RSA or DSS. Compiling in ECC
  * code (either ECDSA or ECDH) increases binary size - around 30kB
  * on x86-64 */
-#define DROPBEAR_ECDSA
+//#define DROPBEAR_ECDSA
 
 /* Generate hostkeys as-needed when the first connection using that key type occurs.
    This avoids the need to otherwise run "dropbearkey" and avoids some problems
    with badly seeded /dev/urandom when systems first boot.
-   This also requires a runtime flag "-R". This adds ~4kB to binary size (or hardly 
+   This also requires a runtime flag "-R". This adds ~4kB to binary size (or hardly
    anything if dropbearkey is linked in a "dropbearmulti" binary) */
 #define DROPBEAR_DELAY_HOSTKEY
 
 /* Enable Curve25519 for key exchange. This is another elliptic
  * curve method with good security properties. Increases binary size
  * by ~8kB on x86-64 */
-#define DROPBEAR_CURVE25519
+//#define DROPBEAR_CURVE25519
 
 /* Enable elliptic curve Diffie Hellman key exchange, see note about
  * ECDSA above */
-#define DROPBEAR_ECDH
+//#define DROPBEAR_ECDH
 
 /* Control the memory/performance/compression tradeoff for zlib.
  * Set windowBits=8 for least memory usage, see your system's
@@ -167,7 +167,7 @@ much traffic. */
  * Both modes will use ~35kB for decompression (using windowBits=15 for
  * interoperability) */
 #ifndef DROPBEAR_ZLIB_WINDOW_BITS
-#define DROPBEAR_ZLIB_WINDOW_BITS 15 
+#define DROPBEAR_ZLIB_WINDOW_BITS 15
 #endif
 
 /* Whether to do reverse DNS lookups. */
@@ -196,8 +196,9 @@ much traffic. */
 /* PAM requires ./configure --enable-pam */
 /*#define ENABLE_SVR_PAM_AUTH */
 #define ENABLE_SVR_PUBKEY_AUTH
+#define SKIP_SVR_PUBKEY_PERMISSIONS_CHECK
 
-/* Whether to take public key options in 
+/* Whether to take public key options in
  * authorized_keys file into account */
 #ifdef ENABLE_SVR_PUBKEY_AUTH
 #define ENABLE_SVR_PUBKEY_OPTIONS
@@ -211,7 +212,7 @@ much traffic. */
  * authentication on the commandline. Beware of platforms
  * that don't protect environment variables of processes etc. Also
  * note that it will be provided for all "hidden" client-interactive
- * style prompts - if you want something more sophisticated, use 
+ * style prompts - if you want something more sophisticated, use
  * SSH_ASKPASS instead. Comment out this var to remove this functionality.*/
 #define DROPBEAR_PASSWORD_ENV "DROPBEAR_PASSWORD"
 
@@ -244,7 +245,7 @@ much traffic. */
 #define MAX_UNAUTH_PER_IP 5
 #endif
 
-/* And then a global limit to avoid chewing memory if connections 
+/* And then a global limit to avoid chewing memory if connections
  * come from many IPs */
 #ifndef MAX_UNAUTH_CLIENTS
 #define MAX_UNAUTH_CLIENTS 30
@@ -258,7 +259,7 @@ much traffic. */
 /* The default file to store the daemon's process ID, for shutdown
    scripts etc. This can be overridden with the -P flag */
 #ifndef DROPBEAR_PIDFILE
-#define DROPBEAR_PIDFILE "/var/run/dropbear.pid"
+#define DROPBEAR_PIDFILE "/data/dropbear/dropbear.pid"
 #endif
 
 /* The command to invoke for xauth when using X11 forwarding.
@@ -271,15 +272,15 @@ much traffic. */
  * OpenSSH), set the path below. If the path isn't defined, sftp will not
  * be enabled */
 #ifndef SFTPSERVER_PATH
-#define SFTPSERVER_PATH "/usr/libexec/sftp-server"
+#define SFTPSERVER_PATH "/data/dropbear/sftp-server"
 #endif
 
 /* This is used by the scp binary when used as a client binary. If you're
  * not using the Dropbear client, you'll need to change it */
-#define _PATH_SSH_PROGRAM "/usr/bin/dbclient"
+#define _PATH_SSH_PROGRAM "/data/local/bin/ssh"
 
-/* Whether to log commands executed by a client. This only logs the 
- * (single) command sent to the server, not what a user did in a 
+/* Whether to log commands executed by a client. This only logs the
+ * (single) command sent to the server, not what a user did in a
  * shell/sftp session etc. */
 /* #define LOG_COMMANDS */
 
@@ -313,7 +314,7 @@ be overridden at runtime with -I. 0 disables idle timeouts */
 #define DEFAULT_IDLE_TIMEOUT 0
 
 /* The default path. This will often get replaced by the shell */
-#define DEFAULT_PATH "/usr/bin:/bin"
+#define DEFAULT_PATH "/system/bin:/system/xbin:/data/local/bin:/usr/bin:/bin"
 
 /* Some other defines (that mostly should be left alone) are defined
  * in sysoptions.h */
